@@ -2,16 +2,15 @@ package com.devsuperior.bds04.controller;
 
 import com.devsuperior.bds04.dto.CityDTO;
 import com.devsuperior.bds04.services.CityService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/cities")
@@ -21,15 +20,16 @@ public class CityController {
     private CityService service;
 
     @GetMapping
-    public ResponseEntity<Page<CityDTO>> findAll(Pageable pageable) {
+    public ResponseEntity<List<CityDTO>> findAll() {
 
-        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("name"));
-        Page<CityDTO> cities = service.findAll(pageRequest);
+        //PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("name"));
+        List<CityDTO> cities = service.findAll();
         return ResponseEntity.ok(cities);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
-    public ResponseEntity<CityDTO> insert(@RequestBody CityDTO dto) {
+    public ResponseEntity<CityDTO> insert(@Valid @RequestBody CityDTO dto) {
 
         dto = service.insert(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(dto).toUri();
